@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klinische Scores · Klinikum Emden</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e1117;
+  --surface: #161b26;
+  --surface2: #1e2535;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8eaf0;
+  --text2: #8a9bb8;
+  --text3: #4f5f7a;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --accent: #4e9fff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+header {
+  background: rgba(14,17,23,0.98);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--text); letter-spacing: .04em; }
+.logo span { color: var(--accent); }
+.header-sub { font-size: 12px; color: rgba(232,234,240,0.38); }
+
+.tool-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 1.5rem;
+  height: 38px;
+  background: rgba(14,17,23,0.98);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tool-nav::-webkit-scrollbar { display: none; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(232,234,240,0.45);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all .15s;
+  letter-spacing: .02em;
+}
+.nav-item:hover { color: rgba(232,234,240,0.85); background: rgba(255,255,255,0.06); }
+.nav-item.active { color: #e8eaf0; background: rgba(255,255,255,0.09); }
+
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 4rem 2rem 6rem;
+}
+
+.hero {
+  margin-bottom: 3rem;
+}
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: .75rem;
+}
+.hero-title {
+  font-family: var(--mono);
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+.hero-title span { color: var(--accent); }
+.hero-sub {
+  font-size: 15px;
+  color: var(--text2);
+  max-width: 540px;
+  line-height: 1.7;
+}
+
+.section-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 10px;
+  margin-bottom: 3.5rem;
+}
+
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.4rem 1.5rem 1.25rem;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.tool-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--cc);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.tool-card:hover {
+  border-color: var(--border2);
+  background: var(--surface2);
+  transform: translateY(-2px);
+}
+.tool-card:hover::after { opacity: 1; }
+
+.card-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--cc);
+  margin-bottom: .5rem;
+}
+.card-name {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: .5rem;
+}
+.card-desc {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+  flex: 1;
+  margin-bottom: 1rem;
+}
+.card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 1rem;
+}
+.chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+.card-arrow {
+  font-size: 12px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color .2s, gap .15s;
+}
+.tool-card:hover .card-arrow { color: var(--cc); gap: 8px; }
+
+.divider { height: 1px; background: var(--border); margin: 2.5rem 0; }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+}
+.info-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: .5rem;
+}
+.info-text {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+  margin-top: 3rem;
+  font-size: 12px;
+  color: var(--text3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.footer-note { font-family: var(--mono); }
+
+@media (max-width: 620px) {
+  .tools-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 26px; }
+  .page { padding: 2.5rem 1.25rem 4rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Klinische<span>Scores</span></div>
+  <div class="header-sub">Klinikum Emden · Intensivmedizin</div>
+</header>
+
+<nav class="tool-nav">
+  <a href="index.html" class="nav-item active">⌂ Übersicht</a>
+  <a href="mcast.html" class="nav-item">mCAST</a>
+  <a href="hypona.html" class="nav-item">HypoNa</a>
+  <a href="news2.html" class="nav-item">NEWS2</a>
+  <a href="sofa.html" class="nav-item">SOFA</a>
+  <a href="lae.html" class="nav-item">LAE</a>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Klinische Entscheidungsunterstützung</div>
+    <div class="hero-title">Scores &amp;<br><span>Rechner</span></div>
+    <div class="hero-sub">Interaktive klinische Tools für Intensivmedizin und Notaufnahme. Alle Rechner laufen vollständig im Browser — keine Daten verlassen das Gerät.</div>
+  </div>
+
+  <div class="section-eyebrow">Verfügbare Tools</div>
+  <div class="tools-grid">
+
+    <a href="mcast.html" class="tool-card" style="--cc:#4e9fff">
+      <div class="card-tag">Prognose · Post-Reanimation</div>
+      <div class="card-name">mCAST</div>
+      <div class="card-desc">Modified Cardiac Arrest Survival Score. Prognostiziert das neurologische Outcome nach Reanimation anhand von Aufnahme­parametern auf der Intensivstation.</div>
+      <div class="card-chips">
+        <span class="chip">Erstrhythmus</span>
+        <span class="chip">Bystander CPR</span>
+        <span class="chip">ROSC-Zeit</span>
+        <span class="chip">Laktat</span>
+        <span class="chip">GCS</span>
+        <span class="chip">pH</span>
+      </div>
+      <div class="card-arrow">Öffnen →</div>
+    </a>
+
+    <a href="hypona.html" class="tool-card" style="--cc:#3ecf8e">
+      <div class="card-tag">Entscheidungsbaum · Elektrolyte</div>
+      <div class="card-name">Hyponatriämie</div>
+      <div class="card-desc">Schrittweiser Entscheidungsbaum zur Diagnostik und Therapie der Hyponatriämie (S-Na &lt; 135 mmol/l) inkl. Serum-Osmolalitätsrechner.</div>
+      <div class="card-chips">
+        <span class="chip">Symptomatik</span>
+        <span class="chip">Serum-Osm</span>
+        <span class="chip">Volumenstatus</span>
+        <span class="chip">U-Na</span>
+        <span class="chip">U-Osm</span>
+      </div>
+      <div class="card-arrow">Öffnen →</div>
+    </a>
+
+    <a href="news2.html" class="tool-card" style="--cc:#f5c842">
+      <div class="card-tag">Frühwarnsystem · Vitalparameter</div>
+      <div class="card-name">NEWS2</div>
+      <div class="card-desc">National Early Warning Score 2. Erkennt klinische Verschlechterung frühzeitig anhand von 7 Vitalparametern. Inkl. SpO₂-Skala 2 für COPD-Patienten.</div>
+      <div class="card-chips">
+        <span class="chip">Atemfrequenz</span>
+        <span class="chip">SpO₂</span>
+        <span class="chip">Blutdruck</span>
+        <span class="chip">Herzfrequenz</span>
+        <span class="chip">ACVPU</span>
+        <span class="chip">Temperatur</span>
+      </div>
+      <div class="card-arrow">Öffnen →</div>
+    </a>
+
+    <a href="sofa.html" class="tool-card" style="--cc:#f25f5c">
+      <div class="card-tag">Organversagen · Sepsis</div>
+      <div class="card-name">SOFA</div>
+      <div class="card-desc">Sequential Organ Failure Assessment. Quantifiziert Ausmaß und Verlauf des Organversagens. Inkl. RASS-Surrogate für sedierte Patienten.</div>
+      <div class="card-chips">
+        <span class="chip">Respiration</span>
+        <span class="chip">Koagulation</span>
+        <span class="chip">Leber</span>
+        <span class="chip">Kreislauf</span>
+        <span class="chip">GCS / RASS</span>
+        <span class="chip">Niere</span>
+      </div>
+      <div class="card-arrow">Öffnen →</div>
+    </a>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-eyebrow">Hinweise</div>
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-label">Datenschutz</div>
+      <div class="info-text">Alle Berechnungen erfolgen ausschließlich lokal im Browser. Es werden keine Patientendaten übertragen oder gespeichert.</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">Haftungsausschluss</div>
+      <div class="info-text">Die Tools dienen der Entscheidungsunterstützung und ersetzen keine klinische Beurteilung. Alle Ergebnisse sind im klinischen Kontext zu interpretieren.</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">Quellen</div>
+      <div class="info-text">NEWS2: Royal College of Physicians 2017. SOFA: Vincent et al., Intensive Care Med 1996. mCAST: Validierte Literatur Post-ROSC.</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">Entwicklung</div>
+      <div class="info-text">Entwickelt für die Intensivmedizin Klinikum Emden. Feedback und Fehlerhinweise bitte an das Ärztliche Team der ICU.</div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-note">Klinikum Emden · Intensivmedizin</span>
+    <span>Keine Patientendaten · Lokale Ausführung</span>
+  </footer>
+
+</div>
+</body>
+</html>

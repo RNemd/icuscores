@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEWS2 · National Early Warning Score</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e1117;
+  --surface: #161b26;
+  --surface2: #1e2535;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8eaf0;
+  --text2: #8a9bb8;
+  --text3: #4f5f7a;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --c-green: #3ecf8e;
+  --c-green-bg: rgba(62,207,142,0.12);
+  --c-yellow: #f5c842;
+  --c-yellow-bg: rgba(245,200,66,0.12);
+  --c-orange: #f5823a;
+  --c-orange-bg: rgba(245,130,58,0.12);
+  --c-red: #f25f5c;
+  --c-red-bg: rgba(242,95,92,0.12);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+header {
+  background: rgba(14,17,23,0.95);
+  backdrop-filter: blur(12px);
+  color: #e8eaf0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 0 2rem;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { font-family: var(--mono); font-size: 15px; font-weight: 500; letter-spacing: .04em; }
+.logo span { color: #4e9fff; }
+.header-sub { font-size: 12px; color: rgba(232,234,240,0.38); }
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+  display: grid;
+  grid-template-columns: 1fr 290px;
+  gap: 1.5rem;
+  align-items: start;
+}
+.params { display: flex; flex-direction: column; gap: 8px; }
+
+/* PARAM CARD */
+.param-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.param-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.param-idx { font-family: var(--mono); font-size: 10px; color: var(--text3); width: 18px; flex-shrink: 0; }
+.param-name { font-size: 13px; font-weight: 500; flex: 1; }
+.param-unit { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.param-badge {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface2);
+  color: var(--text3);
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.b0 { background: var(--c-green-bg) !important; color: var(--c-green) !important; }
+.b1 { background: var(--c-yellow-bg) !important; color: var(--c-yellow) !important; }
+.b2 { background: var(--c-orange-bg) !important; color: var(--c-orange) !important; }
+.b3 { background: var(--c-red-bg) !important; color: var(--c-red) !important; }
+
+/* SEGMENTS */
+.segments {
+  display: flex;
+  padding: 8px 12px;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.seg {
+  flex: 1;
+  min-width: 44px;
+  padding: 7px 4px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border2);
+  background: var(--surface2);
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+  user-select: none;
+  line-height: 1.3;
+}
+.seg:hover { border-color: rgba(255,255,255,0.3); }
+.seg-pts { display: block; font-family: var(--mono); font-size: 9px; color: var(--text3); margin-bottom: 2px; }
+.seg-val { display: block; font-size: 12px; font-weight: 500; color: var(--text); }
+.seg-sub { display: block; font-size: 10px; color: var(--text2); }
+
+.sel0 { background: var(--c-green-bg) !important; border-color: var(--c-green) !important; }
+.sel0 .seg-pts, .sel0 .seg-val, .sel0 .seg-sub { color: var(--c-green) !important; }
+.sel1 { background: var(--c-yellow-bg) !important; border-color: var(--c-yellow) !important; }
+.sel1 .seg-pts, .sel1 .seg-val, .sel1 .seg-sub { color: var(--c-yellow) !important; }
+.sel2 { background: var(--c-orange-bg) !important; border-color: var(--c-orange) !important; }
+.sel2 .seg-pts, .sel2 .seg-val, .sel2 .seg-sub { color: var(--c-orange) !important; }
+.sel3 { background: var(--c-red-bg) !important; border-color: var(--c-red) !important; }
+.sel3 .seg-pts, .sel3 .seg-val, .sel3 .seg-sub { color: var(--c-red) !important; }
+
+/* COPD toggle */
+.copd-row {
+  padding: 0 12px 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.copd-row input { cursor: pointer; }
+.copd-note {
+  margin: 0 12px 10px;
+  background: rgba(78,159,255,0.08);
+  border: 1px solid rgba(78,159,255,0.25);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #7eb8ff;
+  line-height: 1.5;
+  display: none;
+}
+
+/* RESULT */
+.result-panel {
+  position: sticky;
+  top: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.score-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.25rem 1.1rem;
+  text-align: center;
+}
+.sc-label { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--text3); text-transform: uppercase; margin-bottom: .4rem; }
+.sc-number {
+  font-family: var(--mono);
+  font-size: 58px;
+  font-weight: 500;
+  line-height: 1;
+  transition: color .25s;
+}
+.sc-denom { font-size: 20px; color: var(--text3); }
+.sc-bar-wrap { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; margin: .9rem 0 .7rem; overflow: hidden; }
+.sc-bar { height: 100%; border-radius: 3px; transition: width .35s cubic-bezier(.4,0,.2,1), background .25s; }
+.sc-risk {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all .25s;
+}
+
+.response-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.1rem .9rem;
+}
+.rc-label { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--text3); text-transform: uppercase; margin-bottom: .6rem; }
+.rc-item {
+  display: flex;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text2);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.45;
+  align-items: flex-start;
+}
+.rc-item:last-child { border-bottom: none; }
+.rc-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+
+.sub-scores {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .9rem 1.1rem;
+}
+.ss-label { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--text3); text-transform: uppercase; margin-bottom: .6rem; }
+.ss-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 3px 0;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+}
+.ss-row:last-child { border-bottom: none; }
+.ss-name { flex: 1; }
+.ss-val {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  width: 22px;
+  text-align: right;
+}
+
+.reset-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 9px;
+  cursor: pointer;
+  width: 100%;
+  transition: all .15s;
+}
+.reset-btn:hover { background: var(--surface2); color: var(--text); }
+
+@media (max-width: 680px) {
+  .page { grid-template-columns: 1fr; }
+  .result-panel { position: static; }
+  .sc-number { font-size: 44px; }
+}
+
+/* ── TOOL NAV ── */
+.tool-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 1.5rem;
+  height: 38px;
+  background: rgba(14,17,23,0.98);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tool-nav::-webkit-scrollbar { display: none; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(232,234,240,0.45);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all .15s;
+  letter-spacing: .02em;
+}
+.nav-item:hover { color: rgba(232,234,240,0.85); background: rgba(255,255,255,0.06); }
+.nav-item.active { color: #e8eaf0; background: rgba(255,255,255,0.09); }
+.nav-icon { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">NEWS<span>2</span></div>
+  <div class="header-sub">National Early Warning Score 2 · Royal College of Physicians 2017</div>
+</header>
+<nav class="tool-nav">
+  <a href="index.html" class="nav-item">⌂ Übersicht</a>
+  <a href="mcast.html" class="nav-item">mCAST</a>
+  <a href="hypona.html" class="nav-item">HypoNa</a>
+  <a href="news2.html" class="nav-item active">NEWS2</a>
+  <a href="sofa.html" class="nav-item">SOFA</a>
+  <a href="lae.html" class="nav-item">LAE</a>
+</nav>
+
+<div class="page">
+  <div class="params" id="params-container"></div>
+
+  <aside class="result-panel">
+    <div class="score-card">
+      <div class="sc-label">Gesamtscore</div>
+      <div class="sc-number" id="sc-num" style="color:var(--text)">0<span class="sc-denom">/20</span></div>
+      <div class="sc-bar-wrap"><div class="sc-bar" id="sc-bar" style="width:0%;background:#ddd"></div></div>
+      <span class="sc-risk" id="sc-risk" style="background:var(--surface2);color:var(--text3)">Werte eingeben</span>
+    </div>
+
+    <div class="response-card">
+      <div class="rc-label">Klinische Reaktion</div>
+      <div id="rc-items"><div style="font-size:12px;color:var(--text3)">Noch keine Werte eingegeben.</div></div>
+    </div>
+
+    <div class="sub-scores">
+      <div class="ss-label">Einzelwerte</div>
+      <div id="ss-rows"></div>
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()">↺ Zurücksetzen</button>
+  </aside>
+</div>
+
+<script>
+const PARAMS = [
+  {
+    id:"rr", name:"Atemfrequenz", unit:"/min",
+    segs:[
+      {val:"≤ 8", pts:3},
+      {val:"9–11", pts:1},
+      {val:"12–20", pts:0},
+      {val:"21–24", pts:2},
+      {val:"≥ 25", pts:3}
+    ]
+  },
+  {
+    id:"spo2", name:"SpO₂", unit:"%", isSpo2:true,
+    segs:[
+      {val:"≤ 91", pts:3},
+      {val:"92–93", pts:2},
+      {val:"94–95", pts:1},
+      {val:"≥ 96", pts:0}
+    ],
+    segs2:[
+      {val:"≤ 83", pts:3},
+      {val:"84–85", pts:2},
+      {val:"86–87", pts:1},
+      {val:"88–92", pts:0},
+      {val:"93–94", sub:"auf O₂", pts:1},
+      {val:"95–96", sub:"auf O₂", pts:2},
+      {val:"≥ 97", sub:"auf O₂", pts:3}
+    ]
+  },
+  {
+    id:"o2", name:"Supplementärer Sauerstoff", unit:"",
+    segs:[
+      {val:"Nein", sub:"Raumluft", pts:0},
+      {val:"Ja", sub:"O₂-Gabe", pts:2}
+    ],
+    isCopd: true
+  },
+  {
+    id:"bp", name:"Systolischer Blutdruck", unit:"mmHg",
+    segs:[
+      {val:"≤ 90", pts:3},
+      {val:"91–100", pts:2},
+      {val:"101–110", pts:1},
+      {val:"111–219", pts:0},
+      {val:"≥ 220", pts:3}
+    ]
+  },
+  {
+    id:"hr", name:"Herzfrequenz", unit:"/min",
+    segs:[
+      {val:"≤ 40", pts:3},
+      {val:"41–50", pts:1},
+      {val:"51–90", pts:0},
+      {val:"91–110", pts:1},
+      {val:"111–130", pts:2},
+      {val:"≥ 131", pts:3}
+    ]
+  },
+  {
+    id:"avpu", name:"Bewusstseinslage (ACVPU)", unit:"",
+    segs:[
+      {val:"A", sub:"Alert", pts:0},
+      {val:"C", sub:"Verwirrt (neu)", pts:3},
+      {val:"V", sub:"Voice", pts:3},
+      {val:"P", sub:"Pain", pts:3},
+      {val:"U", sub:"Unresponsive", pts:3}
+    ]
+  },
+  {
+    id:"temp", name:"Körpertemperatur", unit:"°C",
+    segs:[
+      {val:"≤ 35,0", pts:3},
+      {val:"35,1–36,0", pts:1},
+      {val:"36,1–38,0", pts:0},
+      {val:"38,1–39,0", pts:1},
+      {val:"≥ 39,1", pts:2}
+    ]
+  }
+];
+
+const RISKS = [
+  {
+    test: (t,h3) => t===0 && !h3,
+    color:"#3ecf8e", bg:"rgba(62,207,142,0.12)", bar:"#3ecf8e",
+    label:"Kein erhöhtes Risiko",
+    items:[
+      "Routineüberwachung alle 12 Stunden",
+      "NEWS2 bei klinischer Verschlechterung wiederholen"
+    ]
+  },
+  {
+    test: (t,h3) => t>=1 && t<=4 && !h3,
+    color:"#f5c842", bg:"rgba(245,200,66,0.12)", bar:"#d4a800",
+    label:"Niedriges Risiko",
+    items:[
+      "Mindestens alle 4–6 Stunden überwachen",
+      "Pflegekraft informiert zuständigen Arzt",
+      "Bei Score ≥ 3 in einem Einzelparameter: engmaschigere Kontrolle"
+    ]
+  },
+  {
+    test: (t,h3) => (t>=5 && t<=6) || (t>=1 && h3),
+    color:"#f5823a", bg:"rgba(245,130,58,0.12)", bar:"#e06000",
+    label:"Mittleres Risiko",
+    items:[
+      "Sofortige Beurteilung durch zuständigen Arzt",
+      "Stündliches oder kontinuierliches Monitoring",
+      "Verlegung auf Überwachungsstation prüfen",
+      "BGA, Labor, 12-Kanal-EKG"
+    ]
+  },
+  {
+    test: (t,h3) => t>=7,
+    color:"#f25f5c", bg:"rgba(242,95,92,0.12)", bar:"#e03333",
+    label:"Hohes Risiko — Notfall",
+    items:[
+      "Sofortige Beurteilung durch erfahrenes Ärzteteam (≥ 5 J. Erfahrung)",
+      "Kontinuierliches Monitoring",
+      "Sofortige Verlegung auf Intensiv- oder IMC-Station",
+      "Sepsis und akutes Kreislaufversagen ausschließen"
+    ]
+  }
+];
+
+let scores = {};
+let useScale2 = false;
+
+function buildUI() {
+  const c = document.getElementById('params-container');
+  PARAMS.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'param-card';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'param-header';
+    hdr.innerHTML = `<span class="param-idx">${String(i+1).padStart(2,'0')}</span>
+      <span class="param-name">${p.name}</span>
+      ${p.unit ? `<span class="param-unit">${p.unit}</span>` : ''}
+      <div class="param-badge" id="badge-${p.id}">–</div>`;
+    card.appendChild(hdr);
+
+    const segs = document.createElement('div');
+    segs.className = 'segments';
+    segs.id = 'segs-' + p.id;
+    renderSegs(segs, p.id, p.segs);
+    card.appendChild(segs);
+
+    if (p.isCopd) {
+      const row = document.createElement('div');
+      row.className = 'copd-row';
+      row.innerHTML = `<input type="checkbox" id="copd-cb" onchange="toggleScale2(this.checked)">
+        <label for="copd-cb">Hyperkapnische Ateminsuffizienz (COPD) → SpO₂-Skala 2 verwenden</label>`;
+      card.appendChild(row);
+
+      const note = document.createElement('div');
+      note.className = 'copd-note';
+      note.id = 'copd-note';
+      note.innerHTML = '<strong>Skala 2 aktiv:</strong> SpO₂-Zielbereich 88–92 %. Werte > 92 % unter O₂ werden höher bewertet, da sie eine ungewollte Hyperoxie anzeigen.';
+      card.appendChild(note);
+    }
+
+    c.appendChild(card);
+  });
+  updateResult();
+}
+
+function renderSegs(container, paramId, segList) {
+  container.innerHTML = '';
+  segList.forEach(seg => {
+    const btn = document.createElement('div');
+    btn.className = 'seg';
+    btn.innerHTML = `<span class="seg-pts">+${seg.pts}</span><span class="seg-val">${seg.val}</span>${seg.sub ? `<span class="seg-sub">${seg.sub}</span>` : ''}`;
+    btn.addEventListener('click', () => {
+      Array.from(container.children).forEach(s => s.className = 'seg');
+      btn.className = 'seg sel' + Math.min(seg.pts, 3);
+      scores[paramId] = seg.pts;
+      const badge = document.getElementById('badge-' + paramId);
+      badge.textContent = seg.pts;
+      badge.className = 'param-badge b' + Math.min(seg.pts, 3);
+      updateResult();
+    });
+    container.appendChild(btn);
+  });
+}
+
+function toggleScale2(on) {
+  useScale2 = on;
+  document.getElementById('copd-note').style.display = on ? 'block' : 'none';
+  delete scores['spo2'];
+  const badge = document.getElementById('badge-spo2');
+  badge.textContent = '–';
+  badge.className = 'param-badge';
+  const spo2p = PARAMS.find(p => p.id === 'spo2');
+  renderSegs(document.getElementById('segs-spo2'), 'spo2', on ? spo2p.segs2 : spo2p.segs);
+  updateResult();
+}
+
+function hasSingle3() {
+  return Object.values(scores).some(v => v === 3);
+}
+
+function getRisk(total) {
+  for (const r of [...RISKS].reverse()) {
+    if (r.test(total, hasSingle3())) return r;
+  }
+  return RISKS[0];
+}
+
+function updateResult() {
+  const total = Object.values(scores).reduce((a,b) => a+b, 0);
+  const filled = Object.keys(scores).length;
+
+  document.getElementById('sc-num').innerHTML = `${total}<span class="sc-denom">/20</span>`;
+
+  const bar = document.getElementById('sc-bar');
+  const risk = getRisk(total);
+
+  bar.style.width = Math.round(total / 20 * 100) + '%';
+  bar.style.background = filled ? risk.bar : 'rgba(255,255,255,0.08)';
+
+  const num = document.getElementById('sc-num');
+  num.style.color = filled ? risk.color : 'var(--text)';
+
+  const badge = document.getElementById('sc-risk');
+  if (!filled) {
+    badge.style.background = 'rgba(255,255,255,0.06)';
+    badge.style.color = 'var(--text3)';
+    badge.textContent = 'Werte eingeben';
+  } else {
+    badge.style.background = risk.bg;
+    badge.style.color = risk.color;
+    badge.textContent = risk.label;
+  }
+
+  const rcItems = document.getElementById('rc-items');
+  if (!filled) {
+    rcItems.innerHTML = '<div style="font-size:12px;color:var(--text3)">Noch keine Werte eingegeben.</div>';
+  } else {
+    rcItems.innerHTML = risk.items.map(item =>
+      `<div class="rc-item"><div class="rc-dot" style="background:${risk.color}"></div><div>${item}</div></div>`
+    ).join('');
+  }
+
+  const ssRows = document.getElementById('ss-rows');
+  const names = { rr:'Atemfrequenz', spo2:'SpO₂', o2:'O₂-Gabe', bp:'Blutdruck syst.', hr:'Herzfrequenz', avpu:'Bewusstsein', temp:'Temperatur' };
+  ssRows.innerHTML = PARAMS.map(p => {
+    const v = scores[p.id];
+    const disp = v !== undefined ? v : '–';
+    const cls = v !== undefined ? ['b0','b1','b2','b3'][Math.min(v,3)] : '';
+    return `<div class="ss-row"><span class="ss-name">${names[p.id]||p.name}</span><span class="ss-val ${cls}">${disp}</span></div>`;
+  }).join('');
+}
+
+function resetAll() {
+  scores = {};
+  useScale2 = false;
+  const cb = document.getElementById('copd-cb');
+  if (cb) cb.checked = false;
+  const note = document.getElementById('copd-note');
+  if (note) note.style.display = 'none';
+  const spo2p = PARAMS.find(p => p.id === 'spo2');
+  renderSegs(document.getElementById('segs-spo2'), 'spo2', spo2p.segs);
+  PARAMS.forEach(p => {
+    const segs = document.getElementById('segs-' + p.id);
+    if (segs) Array.from(segs.children).forEach(s => s.className = 'seg');
+    const badge = document.getElementById('badge-' + p.id);
+    if (badge) { badge.textContent = '–'; badge.className = 'param-badge'; }
+  });
+  updateResult();
+}
+
+buildUI();
+</script>
+</body>
+</html>
